@@ -1,0 +1,99 @@
+  
+import numpy as np 
+import cv2 
+import pyautogui
+import mouse as m
+import keyboard
+import tkinter
+from tkinter import *
+from PIL import ImageTk, Image
+import threading
+from pynput import mouse
+
+
+
+class Clicker:
+    x = 3
+    y = 0
+
+    
+    #the self paramater ecapsulates the gui, allowing the mouse listener and gui to work in tangent, rather than using threads (gui can only be updated this way)
+    def __init__(self,gui):
+        self.root = gui
+        self.root.geometry("1000x1000")
+        self.root.title("Mouse Click")
+        global x
+        global y
+        
+        #this makes an object that binds all the other thinter objects together
+        self.b = tkinter.Button(self.root, text = 'Start' , width=25, command=gui.destroy) #edit command to start auto clicker
+        
+        self.b.pack()
+        
+        
+        
+       
+        self.x_coordinates = tkinter.StringVar()
+        self.y_coordinates = tkinter.StringVar()
+        self.RGB = tkinter.StringVar()
+        
+        RGB = tkinter.Label(gui, textvariable= self.RGB)
+        x_coordinates_label = tkinter.Label(gui, textvariable =(self.x_coordinates))
+        y_coordinates_label = tkinter.Label(gui, textvariable = (self.y_coordinates))
+        
+        RGB.pack()
+        x_coordinates_label.pack()
+        y_coordinates_label.pack()
+        
+        
+        
+        
+        with mouse.Listener(on_click=self.on_click) as listener:
+            # Run the Tkinter main loop
+            gui.mainloop()
+            #listener.join()
+
+        
+        
+    
+
+    ############## take screenshot using pyautogui and then create a window using screenshot #####
+        #img = pyautogui.screenshot() 
+        #img = cv2.cvtColor(np.array(img),  cv2.COLOR_RGB2BGR) 
+        #cv2.imwrite("image1.png", img) 
+        #
+        #img_loaded = ImageTk.PhotoImage(Image.open("image1.png"))#have to load the image before starting
+        #
+        #panel = Label(r,image=img_loaded)
+        #panel.pack(side = "bottom", fill ="both", expand="no")
+    ######################################## 
+        
+        
+    
+    # https://stackoverflow.com/questions/56787999/python-opencv-realtime-get-rgb-values-when-mouse-is-clicked
+
+
+    def on_click(self, newx, newy, button, pressed):
+        if pressed:
+            global x 
+            global y
+            x = newx
+            y = newy
+            
+            print("X coordinates ", x, " Y coordinates ", y)
+            print("Color here is ",  pyautogui.pixel(x, y))
+            
+            self.x_coordinates.set(f"Mouse X clicked at {x}")
+            self.y_coordinates.set(f"Mouse Y clicked at {y}")
+            bg_color = rgb_to_hex(*pyautogui.pixel(x, y))
+            self.RGB.set(f"RGB colors are {pyautogui.pixel(x, y)}")
+            self.b.config(bg=bg_color)#cast string as pyautgui returns a tuple
+    
+     
+def rgb_to_hex(r, g, b):
+    return f'#{r:02x}{g:02x}{b:02x}'
+    # writing it to the disk using opencv 
+
+gui = tkinter.Tk()
+application = Clicker(gui)
+
